@@ -1,254 +1,89 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
+
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Callback Hell</title>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="コールバック地獄 : callbackhell.com 日本語試訳" />
 
-    <link rel="stylesheet" href="stylesheets/style.css">
-    <link rel="stylesheet" href="stylesheets/rainbow.github.css">
-    
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>コールバック地獄</title>
   </head>
+
   <body>
-    <div id="container">
-      <div id="main">
-        <div id="post" class="sticky-menu">
-          <div class="inner clearfix">
-            <div class="document prose">
-              <div class="surface preview">
-                <div class="content-preview-wrapper">
-                  <div class="content-preview">
-                    <div class="post-content">
-                      # Callback Hell
-                      
-                      *A guide to writing asynchronous javascript programs*
-                      
-                      ### What is "*callback hell*"?
-                      
-                      Asynchronous javascript, or javascript that uses callbacks, is hard to get right intuitively. A lot of code ends up looking like this:
-                      
-                          fs.readdir(source, function(err, files) {
-                            if (err) {
-                              console.log('Error finding files: ' + err)
-                            } else {
-                              files.forEach(function(filename, fileIndex) {
-                                console.log(filename)
-                                gm(source + filename).size(function(err, values) {
-                                  if (err) {
-                                    console.log('Error identifying file size: ' + err)
-                                  } else {
-                                    console.log(filename + ' : ' + values)
-                                    aspect = (values.width / values.height)
-                                    widths.forEach(function(width, widthIndex) {
-                                      height = Math.round(width / aspect)
-                                      console.log('resizing ' + filename + 'to ' + height + 'x' + height)
-                                      this.resize(width, height).write(destination + 'w' + width + '_' + filename, function(err) {
-                                        if (err) console.log('Error writing file: ' + err)
-                                      })
-                                    }.bind(this))
-                                  }
-                                })
-                              })
-                            }
-                          })
-                      
-                      See all the instances of `function` and `})`? Eek! This is affectionately known as **callback hell**.
-                      
-                      Writing better code isn't that hard! You only need to know about a few things:
-                      
-                      ## Name your functions
-                      
-                      Here is some (messy) browser javascript that uses [browser-request](https://github.com/iriscouch/browser-request) to make an AJAX request to a server:
-                          
-                          var form = document.querySelector('form')
-                          form.onsubmit = function(submitEvent) {
-                            var name = document.querySelector('input').value
-                            request({
-                              uri: "http://example.com/upload",
-                              body: name,
-                              method: "POST"
-                            }, function(err, response, body) {
-                              var statusMessage = document.querySelector('.status')
-                              if (err) return statusMessage.value = err
-                              statusMessage.value = body
-                            })
-                          }
-                      
-                      This code has two anonymous functions. Let's give em names!
 
-                          var form = document.querySelector('form')
-                          form.onsubmit = function formSubmit(submitEvent) {
-                            var name = document.querySelector('input').value
-                            request({
-                              uri: "http://example.com/upload",
-                              body: name,
-                              method: "POST"
-                            }, function postResponse(err, response, body) {
-                              var statusMessage = document.querySelector('.status')
-                              if (err) return statusMessage.value = err
-                              statusMessage.value = body
-                            })
-                          }
-                          
-                      As you can see naming functions is super easy and does some nice things to your code: 
-                      
-                       - makes code easier to read
-                       - when exceptions happen you will get stacktraces that reference actual function names instead of "anonymous"
-                       - allows you to keep your code shallow, or not nested deeply, which brings me to my next point:
-                       
-                      ## Keep your code shallow
-                      
-                      Building on the last example, let's go a bit further and get rid of the triple level nesting that is going on in the code:
-                      
-                          function formSubmit(submitEvent) {
-                            var name = document.querySelector('input').value
-                            request({
-                              uri: "http://example.com/upload",
-                              body: name,
-                              method: "POST"
-                            }, postResponse)
-                          }
-                      
-                          function postResponse(err, response, body) {
-                            var statusMessage = document.querySelector('.status')
-                            if (err) return statusMessage.value = err
-                            statusMessage.value = body
-                          }
-                      
-                          document.querySelector('form').onsubmit = formSubmit
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/wenoki/callback-hell">View on GitHub</a>
 
-                      Code like this is less scary to look at and is easier to edit, refactor and hack on later.
-                      
-                      ## Modularize!
-                      
-                      This is the most important part: **Anyone is capable of creating modules** (AKA libraries). To quote [Isaac Schlueter](http://twitter.com/izs) (of the node.js project): *"Write small modules that each do one thing, and assemble them into other modules that do a bigger thing. You can't get into callback hell if you don't go there."*
-                      
-                      Let's take out the boilerplate code from above and turn it into a module by splitting it up into a couple of files. Since I write JavaScript in both the browser and on the server, I'll show a method that works in both but is still nice and simple.
-                      
-                      Here is a new file called `formuploader.js` that contains our two functions from before:
-                      
-                          function formSubmit(submitEvent) {
-                            var name = document.querySelector('input').value
-                            request({
-                              uri: "http://example.com/upload",
-                              body: name,
-                              method: "POST"
-                            }, postResponse)
-                          }
-                  
-                          function postResponse(err, response, body) {
-                            var statusMessage = document.querySelector('.status')
-                            if (err) return statusMessage.value = err
-                            statusMessage.value = body
-                          }
+          <h1 id="project_title">コールバック地獄</h1>
+          <h2 id="project_tagline">callbackhell.com 日本語試訳</h2>
 
-                          exports.submit = formSubmit
-                          
-                      The `exports` bit at the end is an example of the CommonJS module system, which is used by Node.js for server side javascript programming. I quite like this style of modules because it is so simple -- you only have to define what should be shared when the module gets required (that's what the `exports` thing is).
-                      
-                      To use CommonJS modules in the browser you can use a command-line thing called [browserify](https://github.com/substack/node-browserify). I won't go into the details on how to use it here but it lets you use `require` to load modules into your programs.
-                      
-                      Now that we have `formuploader.js` (and it is loaded in the page as a script tag) we just need to require it and use it! Here is how our application specific code looks now:
-                
-                          var formUploader = require('formuploader')
-                          document.querySelector('form').onsubmit = formUploader.submit
-                      
-                      Now our application is only two lines of code and has the following benefits:
-                      
-                      - easier for new developers to understand -- they won't get bogged down by having to read through all of the `formuploader` functions
-                      - `formuploader` can get used in other places without duplicating code and can easily be shared on github
-                      - the code itself is nice and simple and easy to read
-                      
-                      There are lots of module patterns for [web browser](http://www.adequatelygood.com/2010/3/JavaScript-Module-Pattern-In-Depth) and [on the server](http://nodejs.org/api/modules.html). Some of them get very complicated. The ones shown here are what I consider to be the simplest to understand.
-                      
-                      ### I still don't get it
-                      
-                      Try reading my [introduction to callbacks](https://github.com/maxogden/art-of-node#callbacks).
-                      
-                      ### What about promises?
-                        [Promises](http://domenic.me/2012/10/14/youre-missing-the-point-of-promises/) are a more abstract pattern of working with async code in JavaScript.
-                      
-                      The scope of this document is to show how to write vanilla javascript. If you use a third party library that adds abstraction to your JS then make sure you're willing to force everyone that contributes to your library to also have the same views on JS as you.
-                      
-                      In my own personal experience I use callbacks for 90% of the async code I write and when things get hairy I bring in something like the [async](https://github.com/caolan/async) library.
-                      
-                      That being said, everyone develops their own unique JavaScript style and you should do what you like. Just remember that there are no absolutes: some people like to use only callbacks, some people don't.
-                      
-                      ### Additional reading
-                      
-                      - [A pattern for decoupling DOM events from @dkastner](https://gist.github.com/3392235)
-                                            
-                      Please contribute new sections or fix existing ones by [forking this project on github](http://github.com/maxogden/callback-hell)!
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/wenoki/callback-hell/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/wenoki/callback-hell/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
     </div>
-    
-    <script src="javascripts/marked.js"></script>
-    <script type="text/javascript">
-      
-      var content = document.querySelector('.post-content')
-      content.setAttribute('style', "white-space: normal;")
-      
-      // kinda hacky but whatever
-      var lines = content.innerHTML.split('\n')
-      var baseIndent = lines[1].split('#')[0]
-      
-      lines = lines.map(function iterator(line) {
-        return line.replace(baseIndent, '')
-      })
-      
-      var trimmed = lines.join('\n')
-      content.innerHTML = marked(trimmed)
-    </script>
-    
-    <script src="javascripts/rainbow.js"></script>
-    <script src="javascripts/generic.js"></script>
-    <script src="javascripts/javascript.js"></script>
-    <script type="text/javascript">
-    
-      var codeBlocks = document.querySelectorAll('code')
-          
-      Array.prototype.forEach.call(codeBlocks, function iterator(block) {
-        block.innerHTML = unescapeEntities(block.innerHTML)
-        block.setAttribute('data-language', 'javascript')
-      })
-      
-      Rainbow.color()
-      
-      // markdown is dumb and always escapes &, < and > with no way to override
-      function unescapeEntities(text) {
-        function un(text) {
-          var d = document.createElement("div")
-          d.innerHTML = text
-          return d.innerText || d.text || d.textContent
-        }
-        // need to unescape twice
-        // > -> &amp;gt; -> &gt; -> >
-        return un(un(text))
-      }
-      
-    </script>
-    
-    <script type="text/javascript">
-      var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-      document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-    </script>
-    <script type="text/javascript">
-      try {
-        var pageTracker = _gat._getTracker("UA-33352116-1");
-      pageTracker._trackPageview();
-      } catch(err) {}
-    </script>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h3>
+<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Welcome to GitHub Pages.</h3>
+
+<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
+
+<pre><code>$ cd your_repo_root/repo_name
+$ git fetch origin
+$ git checkout gh-pages
+</code></pre>
+
+<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+
+<h3>
+<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
+
+<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
+
+<h3>
+<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
+
+<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+
+<h3>
+<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+
+<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
+
+<h3>
+<a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
+
+<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">コールバック地獄 maintained by <a href="https://github.com/wenoki">wenoki</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-41828535-2");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
 
   </body>
 </html>
