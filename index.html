@@ -3,11 +3,11 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Callback Hell</title>
+    <title>コールバック地獄</title>
 
     <link rel="stylesheet" href="stylesheets/style.css">
     <link rel="stylesheet" href="stylesheets/rainbow.github.css">
-    
+
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -23,14 +23,14 @@
                 <div class="content-preview-wrapper">
                   <div class="content-preview">
                     <div class="post-content">
-                      # Callback Hell
-                      
-                      *A guide to writing elegant asynchronous javascript programs*
-                      
-                      ### What is "*callback hell*"?
-                      
-                      Asynchronous javascript, or javascript that uses callbacks, is hard to get right intuitively. A lot of code ends up looking like this:
-                      
+                      # コールバック地獄
+
+                      *非同期JavaScriptプログラミングのための手引き*
+
+                      ### *コールバック地獄*とは何か
+
+                      非同期な処理を行うJavaScript、あるいはコールバックを使ったJavaScriptは、直感的に読みづらいものになりがちである。往々にしてこんなコードが出来上がってしまうはずだ：
+
                           fs.readdir(source, function(err, files) {
                             if (err) {
                               console.log('Error finding files: ' + err)
@@ -55,15 +55,15 @@
                               })
                             }
                           })
-                      
-                      See all the instances of `function` and `})`? Eek! This is affectionately known as **callback hell**.
-                      
-                      Writing better code isn't that hard! You only need to know about a few things:
-                      
-                      ## Name your functions
-                      
-                      Here is some (messy) browser javascript that uses [browser-request](https://github.com/iriscouch/browser-request) to make an AJAX request to a server:
-                          
+
+                      このコードの`function`と`})`の数を見てくれ。こいつをどう思う？オエーッ！これこそ、みんな大好き**コールバック地獄**ってやつだ。
+
+                      幸い、こういうコードをマシにするのはそれほど難しくない。以下に挙げるようなことを知ってさえいれば：
+
+                      ## 関数に名前を付けよう
+
+                      ブラウザで動く「汚い」JavaScriptの一例を挙げよう。このコードは[browser-request](https://github.com/iriscouch/browser-request)を使ってサーバへAjaxリクエストを送っている：
+
                           var form = document.querySelector('form')
                           form.onsubmit = function(submitEvent) {
                             var name = document.querySelector('input').value
@@ -77,8 +77,8 @@
                               statusMessage.value = body
                             })
                           }
-                      
-                      This code has two anonymous functions. Let's give em names!
+
+                      このコードでは、ふたつの無名関数が使われている。それに名前を付けてみよう！
 
                           var form = document.querySelector('form')
                           form.onsubmit = function formSubmit(submitEvent) {
@@ -93,17 +93,17 @@
                               statusMessage.value = body
                             })
                           }
-                          
-                      As you can see naming functions is super easy and does some nice things to your code: 
-                      
-                       - makes code easier to read
-                       - when exceptions happen you will get stacktraces that reference actual function names instead of "anonymous"
-                       - allows you to keep your code shallow, or not nested deeply, which brings me to my next point:
-                       
-                      ## Keep your code shallow
-                      
-                      Building on the last example, let's go a bit further and get rid of the triple level nesting that is going on in the code:
-                      
+
+                      ね、簡単でしょう？関数にただ名前を付けるだけで、次のような利点がもたらされる：
+
+                       - コードが読みやすくなる
+                       - 例外が発生したとき、スタックトレースに関数名が表示されるようになる
+                       - コードを「浅く」し、ネストが深くなりすぎないようにできる。これを次項で解説する
+
+                      ## コードを「浅く」しよう
+
+                      先程の例に引き続き、3段階のネストを取り除くことで、もう少しマシにしてみたコードがこれだ：
+
                           function formSubmit(submitEvent) {
                             var name = document.querySelector('input').value
                             request({
@@ -112,25 +112,25 @@
                               method: "POST"
                             }, postResponse)
                           }
-                      
+
                           function postResponse(err, response, body) {
                             var statusMessage = document.querySelector('.status')
                             if (err) return statusMessage.value = err
                             statusMessage.value = body
                           }
-                      
+
                           document.querySelector('form').onsubmit = formSubmit
 
-                      Code like this is less scary to look at and is easier to edit, refactor and hack on later.
-                      
-                      ## Modularize!
-                      
-                      This is the most important part: **Anyone is capable of creating modules** (AKA libraries). To quote [Isaac Schlueter](http://twitter.com/izs) (of the node.js project): *"Write small modules that each do one thing, and assemble them into other modules that do a bigger thing. You can't get into callback hell if you don't go there."*
-                      
-                      Let's take out the boilerplate code from above and turn it into a module by splitting it up into a couple of files. Since I write JavaScript in both the browser and on the server, I'll show a method that works in both but is still nice and simple.
-                      
-                      Here is a new file called `formuploader.js` that contains our two functions from before:
-                      
+                      コードはそれほど「怖く」なくなり、後で変更を加えることも簡単になったと思う。
+
+                      ## モジュール化しよう
+
+                      これが一番重要なところ。**誰でもモジュール（ライブラリと言い換えても可）を作っていい**。Node.jsプロジェクトの[Isaac Schlueter](http://twitter.com/izs)曰く——*「まず単機能の小さいモジュールを作り、それらを組み合わせてより多くの機能を持つ別のモジュールを作る。そうすればコールバック地獄に悩まされることもないはずだ」*
+
+                      またまた上の例を使って、これをいくつかのファイルに分解しつつモジュール化してみる。私はクライアントサイド・サーバサイド両方のJavaScriptを書くが、どちらでも使えるシンプルな良い方法を紹介しよう。
+
+                      以下は`formuploader.js`という新しいファイルで、まずふたつの関数が書いてある。
+
                           function formSubmit(submitEvent) {
                             var name = document.querySelector('input').value
                             request({
@@ -139,7 +139,7 @@
                               method: "POST"
                             }, postResponse)
                           }
-                  
+
                           function postResponse(err, response, body) {
                             var statusMessage = document.querySelector('.status')
                             if (err) return statusMessage.value = err
@@ -147,31 +147,35 @@
                           }
 
                           exports.submit = formSubmit
-                          
-                      The `exports` bit at the end is an example of the CommonJS module system, which is used by Node.js for server side javascript programming. I quite like this style of modules because it is so simple -- you only have to define what should be shared when the module gets required (that's what the `exports` thing is).
-                      
-                      To use CommonJS modules in the browser you can use a command-line thing called [browserify](https://github.com/substack/node-browserify). I won't go into the details on how to use it here but it lets you use `require` to load modules into your programs.
-                      
-                      Now that we have `formuploader.js` (and it is loaded in the page as a script tag) we just need to require it and use it! Here is how our application specific code looks now:
-                
+
+                      最後の行にある`exports`は、Node.jsによるサーバサイドプログラミングで使われているCommonJSモジュールシステムの一例である。私はこのやり方をとても気に入っている、なぜならとてもシンプル——そのモジュールが呼ばれた時に何が共有されるか（それが何を「`exports`」しているか）、だけを書けば良いから。
+
+                      CommonJSモジュールをブラウザでも使いたい場合、[browserify](https://github.com/substack/node-browserify)を使うといい。ここでは詳しい解説は省くが、これを使うとブラウザでも`require`を使って他のモジュールを呼び出すことが出来るようになる。
+
+                      さて、`formuploader.js`が用意でき、これを既にHTMLのscriptタグで読み込んであるとしよう。あとは`require`でこのモジュールを呼び出すだけで使える！最終的に問題のコードはこのようになった：
+
                           var formUploader = require('formuploader')
                           document.querySelector('form').onsubmit = formUploader.submit
-                      
-                      Now our application is only two lines of code and has the following benefits:
-                      
-                      - easier for new developers to understand -- they won't get bogged down by having to read through all of the `formuploader` functions
-                      - `formuploader` can get used in other places without duplicating code and can easily be shared on github
-                      - the code itself is nice and simple and easy to read
-                      
-                      There are lots of module patterns for [web browser](http://www.adequatelygood.com/2010/3/JavaScript-Module-Pattern-In-Depth) and [on the server](http://nodejs.org/api/modules.html). Some of them get very complicated. The ones shown here are what I consider to be the simplest to understand.
-                      
-                      ### Additional reading
-                      
+
+                      これでアプリケーションにはわずか2行のコードだけが残ることになり、以下のような利点が生まれた：
+
+                      - 新しい開発者でも理解しやすい。`formuploader`関数を全て読むことに足を取られることはない
+                      - `formuploader`はコードのコピペなしに別の場所でも使えるようになり、またGitHubなどでの共有も簡単になる
+                      - コード自体がシンプルになり、読みやすくなる
+
+                      [ブラウザ用](http://www.adequatelygood.com/2010/3/JavaScript-Module-Pattern-In-Depth)と[サーバ用](http://nodejs.org/api/modules.html)どちらにも沢山のモジュールパターンがあり、中にはとても複雑なものもある。ここでは理解しやすいよう、一番シンプルなパターンを紹介した。
+
+                      ### あわせて読みたい
+
                       - [A pattern for decoupling DOM events from @dkastner](https://gist.github.com/3392235)
-                      
-                      *Callback Hell is a work in progress -- check back later for more content.* 
-                      
-                      Please contribute new sections or fix existing ones by [forking this project on github](http://github.com/maxogden/callback-hell)!
+
+                      *コールバック地獄は未完成コンテンツです。また後でチェックしてみて！*
+
+                      [GitHubでフォークして](http://github.com/maxogden/callback-hell)新しい章を足したり校正してください！
+
+                      ### 日本語訳について
+
+                      [Callback Hell](http://callbackhell.com)を雑に翻訳したコンテンツです。NodeとCommonJSのあたりは[このへん](http://meso.hatenablog.com/entry/20110626/1309082158)も参照した方が良いかもです。
                     </div>
                   </div>
                 </div>
@@ -181,39 +185,39 @@
         </div>
       </div>
     </div>
-    
+
     <script src="javascripts/marked.js"></script>
     <script type="text/javascript">
-      
+
       var content = document.querySelector('.post-content')
       content.setAttribute('style', "white-space: normal;")
-      
+
       // kinda hacky but whatever
       var lines = content.innerHTML.split('\n')
       var baseIndent = lines[1].split('#')[0]
-      
+
       lines = lines.map(function iterator(line) {
         return line.replace(baseIndent, '')
       })
-      
+
       var trimmed = lines.join('\n')
       content.innerHTML = marked(trimmed)
     </script>
-    
+
     <script src="javascripts/rainbow.js"></script>
     <script src="javascripts/generic.js"></script>
     <script src="javascripts/javascript.js"></script>
     <script type="text/javascript">
-    
+
       var codeBlocks = document.querySelectorAll('code')
-          
+
       Array.prototype.forEach.call(codeBlocks, function iterator(block) {
         block.innerHTML = unescapeEntities(block.innerHTML)
         block.setAttribute('data-language', 'javascript')
       })
-      
+
       Rainbow.color()
-      
+
       // markdown is dumb and always escapes &, < and > with no way to override
       function unescapeEntities(text) {
         function un(text) {
@@ -225,16 +229,16 @@
         // > -> &amp;gt; -> &gt; -> >
         return un(un(text))
       }
-      
+
     </script>
-    
+
     <script type="text/javascript">
       var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
       document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
     </script>
     <script type="text/javascript">
       try {
-        var pageTracker = _gat._getTracker("UA-33352116-1");
+        var pageTracker = _gat._getTracker("UA-41828535-2");
       pageTracker._trackPageview();
       } catch(err) {}
     </script>

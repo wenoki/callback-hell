@@ -1,1 +1,1 @@
-this will contain information about using callbacks, events and streams to write javascript programs
+[Callback Hell](http://callbackhell.com/) 日本語試訳
